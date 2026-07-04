@@ -1,0 +1,75 @@
+name: CD — AWS
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_API_REPO: interview-stack-api
+  ECR_WEB_REPO: interview-stack-web
+
+jobs:
+  deploy-aws:
+    name: Deploy to AWS ECS
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push API image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f apps/api/Dockerfile -t $ECR_REGISTRY/$ECR_API_REPO:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_API_REPO:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_API_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_API_REPO:latest
+          docker push $ECR_REGISTRY/$ECR_API_REPO:latest
+
+      - name: Build, tag, and push Web image
+        env:
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=https://api.${{ inputs.environment || 'staging' }}.example.com \
+            -t $ECR_REGISTRY/$ECR_WEB_REPO:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_WEB_REPO:$IMAGE_TAG
+
+      - name: Deploy to ECS
+        run: |
+          # Interview: explain rolling deploy, circuit breaker, blue/green with CodeDeploy
+          aws ecs update-service \
+            --cluster interview-stack-${{ inputs.environment || 'staging' }} \
+            --service interview-api \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: Run smoke tests
+        run: |
+          echo "curl https://api.staging.example.com/health"
+          echo "Interview: add post-deploy smoke tests against ALB endpoint"

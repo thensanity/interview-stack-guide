@@ -1,0 +1,79 @@
+# Local development stack — mirrors production NoSQL options
+#
+# Quick start (DB only):
+#   docker compose up -d mongodb
+#   npm run dev
+#
+# Full end-to-end demo (API + Web in containers):
+#   npm run docker:full
+
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      DATA_PROVIDER: mongodb
+      MONGODB_URI: mongodb://mongodb:27017/interview-stack
+      API_PORT: 4000
+      SEED_DATA: "true"
+      DEPLOY_TARGET: kubernetes
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    profiles: ["full"]
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # Browser runs on host — must reach API via localhost, not Docker service name
+        NEXT_PUBLIC_API_URL: http://localhost:4000
+        NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    profiles: ["full"]
+
+volumes:
+  mongo_data:

@@ -1,0 +1,83 @@
+name: CD — Kubernetes
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target namespace
+        required: true
+        default: staging
+        type: choice
+        options: [staging, production]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository }}
+
+jobs:
+  deploy-k8s:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    environment: ${{ inputs.environment || 'staging' }}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API
+        run: |
+          docker build -f apps/api/Dockerfile \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/api:${{ github.sha }} .
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/api:${{ github.sha }}
+
+      - name: Build and push Web
+        run: |
+          docker build -f apps/web/Dockerfile \
+            --build-arg NEXT_PUBLIC_API_URL=http://interview-api:4000 \
+            -t ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/web:${{ github.sha }} .
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/web:${{ github.sha }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure kubeconfig
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
+          export KUBECONFIG=kubeconfig
+
+      - name: Deploy with Helm
+        run: |
+          export KUBECONFIG=kubeconfig
+          NAMESPACE=${{ inputs.environment || 'staging' }}
+          helm upgrade --install interview-stack \
+            infrastructure/kubernetes/helm/interview-stack \
+            --namespace $NAMESPACE \
+            --create-namespace \
+            --set api.image.tag=${{ github.sha }} \
+            --set web.image.tag=${{ github.sha }} \
+            --set api.image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/api \
+            --set web.image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/web \
+            --wait --timeout 5m
+
+      - name: Verify rollout
+        run: |
+          export KUBECONFIG=kubeconfig
+          kubectl rollout status deployment/interview-api -n ${{ inputs.environment || 'staging' }}
+          kubectl rollout status deployment/interview-web -n ${{ inputs.environment || 'staging' }}

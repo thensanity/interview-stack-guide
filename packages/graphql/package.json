@@ -1,0 +1,19 @@
+{
+  "name": "@interview/graphql",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@interview/db": "*",
+    "@interview/events": "*",
+    "graphql": "^16.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.7.3"
+  }
+}

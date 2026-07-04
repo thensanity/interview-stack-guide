@@ -1,0 +1,49 @@
+replicaCount: 2
+
+api:
+  image:
+    repository: ghcr.io/your-org/interview-stack-guide/api
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 4000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  env:
+    DATA_PROVIDER: mongodb
+    DEPLOY_TARGET: kubernetes
+
+web:
+  image:
+    repository: ghcr.io/your-org/interview-stack-guide/web
+    tag: latest
+    pullPolicy: IfNotPresent
+  port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+mongodb:
+  enabled: true
+  storage: 5Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    web: interview.example.com
+    api: api.interview.example.com
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilization: 70

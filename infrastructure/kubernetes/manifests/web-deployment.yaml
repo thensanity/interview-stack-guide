@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interview-web
+  namespace: interview-stack
+  labels:
+    app: interview-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: interview-web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: interview-web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/your-org/interview-stack-guide/web:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: interview-web-config
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interview-web
+  namespace: interview-stack
+spec:
+  selector:
+    app: interview-web
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: ClusterIP

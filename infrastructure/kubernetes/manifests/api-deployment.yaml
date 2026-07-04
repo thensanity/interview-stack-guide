@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interview-api
+  namespace: interview-stack
+  labels:
+    app: interview-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: interview-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: interview-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/your-org/interview-stack-guide/api:latest
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: interview-api-config
+          # Interview: liveness = restart pod; readiness = remove from Service endpoints
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interview-api
+  namespace: interview-stack
+spec:
+  selector:
+    app: interview-api
+  ports:
+    - port: 4000
+      targetPort: 4000
+  type: ClusterIP

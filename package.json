@@ -1,0 +1,30 @@
+{
+  "name": "interview-stack-guide",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack interview reference: Next.js, NoSQL/GraphQL duality, CI/CD, AWS/Kubernetes deployment",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,next,react -c blue,green,cyan \"npm run dev -w @interview/api\" \"npm run dev -w @interview/web\" \"npm run dev -w @interview/react-spa\"",
+    "dev:next": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/web\"",
+    "dev:react": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/react-spa\"",
+    "build": "npm run build -w @interview/db && npm run build -w @interview/events && npm run build -w @interview/graphql && npm run build -w @interview/api && npm run build -w @interview/web && npm run build -w @interview/react-spa",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "docker:up": "docker compose up -d mongodb",
+    "docker:down": "docker compose down",
+    "docker:full": "docker compose --profile full up -d --build",
+    "docker:smoke": "powershell -ExecutionPolicy Bypass -File scripts/smoke-test.ps1",
+    "seed": "SEED_DATA=true npm run dev -w @interview/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
