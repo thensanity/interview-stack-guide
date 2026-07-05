@@ -5,6 +5,8 @@ import type {
   ProductFilter,
   CreateProductInput,
   UpdateProductInput,
+  PaginationOptions,
+  PaginatedResult,
 } from "./types.js";
 
 /** MongoDB adapter — document-oriented NoSQL (interview: flexible schema, embedded docs, aggregation pipeline) */
@@ -47,8 +49,34 @@ export class MongoProductRepository implements ProductRepository {
     return this.collection().find(this.buildQuery(filter)).sort({ createdAt: -1 }).toArray();
   }
 
+  async findAllPaginated(
+    filter?: ProductFilter,
+    options?: PaginationOptions
+  ): Promise<PaginatedResult<Product>> {
+    const query = this.buildQuery(filter);
+    const limit = Math.min(options?.limit ?? 20, 100);
+    const offset = options?.cursor ? parseInt(options.cursor, 10) : (options?.offset ?? 0);
+    const [items, total] = await Promise.all([
+      this.collection().find(query).sort({ createdAt: -1 }).skip(offset).limit(limit).toArray(),
+      this.collection().countDocuments(query),
+    ]);
+    const nextOffset = offset + limit;
+    return {
+      items,
+      total,
+      limit,
+      offset,
+      nextCursor: nextOffset < total ? String(nextOffset) : null,
+    };
+  }
+
   async findById(id: string): Promise<Product | null> {
     return this.collection().findOne({ id });
+  }
+
+  async findByIds(ids: string[]): Promise<Product[]> {
+    if (ids.length === 0) return [];
+    return this.collection().find({ id: { $in: ids } }).toArray();
   }
 
   async create(input: CreateProductInput): Promise<Product> {

@@ -11,8 +11,9 @@
     "dev": "concurrently -n api,next,react -c blue,green,cyan \"npm run dev -w @interview/api\" \"npm run dev -w @interview/web\" \"npm run dev -w @interview/react-spa\"",
     "dev:next": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/web\"",
     "dev:react": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/react-spa\"",
-    "build": "npm run build -w @interview/db && npm run build -w @interview/events && npm run build -w @interview/graphql && npm run build -w @interview/api && npm run build -w @interview/web && npm run build -w @interview/react-spa",
+    "build": "npm run build -w @interview/validation && npm run build -w @interview/db && npm run build -w @interview/events && npm run build -w @interview/graphql && npm run build -w @interview/api && npm run build -w @interview/web && npm run build -w @interview/react-spa",
     "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test",
     "lint": "npm run lint --workspaces --if-present",
     "docker:up": "docker compose up -d mongodb",
     "docker:down": "docker compose down",
@@ -21,6 +22,7 @@
     "seed": "SEED_DATA=true npm run dev -w @interview/api"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.0",
     "concurrently": "^9.1.2",
     "typescript": "^5.7.3"
   },

@@ -3,34 +3,71 @@ import type { ProductRepository } from "@interview/db";
 import type { EventBus } from "@interview/events";
 import type { ScenarioSimulator } from "../events/scenario-simulator.js";
 import { withDbGuard } from "../middleware/situational.js";
+import {
+  createProductSchema,
+  updateProductSchema,
+  productFilterSchema,
+  paginationSchema,
+} from "@interview/validation";
+import { validateBody, validateQuery } from "../middleware/validation.js";
+import type { CacheService } from "../middleware/cache.js";
+import { invalidateProductCache } from "../middleware/cache.js";
+
+type ValidatedQuery = {
+  category?: string;
+  inStock?: "true" | "false";
+  minPrice?: number;
+  maxPrice?: number;
+  limit: number;
+  offset: number;
+  cursor?: string;
+};
 
 /** REST layer — emits domain events on CRUD for situational event demo */
 export function createRestRouter(
-  repo: ProductRepository,
+  getRepo: () => ProductRepository,
   provider: string,
   bus: EventBus,
-  simulator: ScenarioSimulator
+  simulator: ScenarioSimulator,
+  cache?: CacheService
 ): Router {
   const router = Router();
+  const invalidate = cache ? invalidateProductCache(cache) : (_req: unknown, _res: unknown, next: () => void) => next();
 
-  router.get("/products", async (req, res) => {
-    try {
-      const filter = {
-        category: req.query.category as string | undefined,
-        inStock: req.query.inStock === "true" ? true : req.query.inStock === "false" ? false : undefined,
-        minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
-        maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
-      };
-      const products = await withDbGuard(simulator, () => repo.findAll(filter));
-      res.json({ data: products, meta: { count: products.length, provider } });
-    } catch {
-      res.status(503).json({ error: "Database unavailable", scenario: "db_error" });
+  router.get(
+    "/products",
+    validateQuery(productFilterSchema.merge(paginationSchema)),
+    async (req, res) => {
+      try {
+        const q = (req as typeof req & { validatedQuery: ValidatedQuery }).validatedQuery;
+        const filter = {
+          category: q.category,
+          inStock: q.inStock === "true" ? true : q.inStock === "false" ? false : undefined,
+          minPrice: q.minPrice,
+          maxPrice: q.maxPrice,
+        };
+        const result = await withDbGuard(simulator, () =>
+          getRepo().findAllPaginated(filter, { limit: q.limit, offset: q.offset, cursor: q.cursor })
+        );
+        res.json({
+          data: result.items,
+          meta: {
+            total: result.total,
+            limit: result.limit,
+            offset: result.offset,
+            nextCursor: result.nextCursor,
+            provider,
+          },
+        });
+      } catch {
+        res.status(503).json({ error: "Database unavailable", scenario: "db_error" });
+      }
     }
-  });
+  );
 
   router.get("/products/:id", async (req, res) => {
     try {
-      const product = await withDbGuard(simulator, () => repo.findById(req.params.id));
+      const product = await withDbGuard(simulator, () => getRepo().findById(req.params.id));
       if (!product) return res.status(404).json({ error: "Product not found" });
       res.json({ data: product });
     } catch {
@@ -38,9 +75,9 @@ export function createRestRouter(
     }
   });
 
-  router.post("/products", async (req, res) => {
+  router.post("/products", validateBody(createProductSchema), invalidate, async (req, res) => {
     try {
-      const product = await withDbGuard(simulator, () => repo.create(req.body));
+      const product = await withDbGuard(simulator, () => getRepo().create(req.body));
       bus.emitDomain("PRODUCT_CREATED", `Product created: ${product.name}`, { productId: product.id });
       res.status(201).json({ data: product });
     } catch {
@@ -48,9 +85,9 @@ export function createRestRouter(
     }
   });
 
-  router.put("/products/:id", async (req, res) => {
+  router.put("/products/:id", validateBody(updateProductSchema), invalidate, async (req, res) => {
     try {
-      const product = await withDbGuard(simulator, () => repo.update(req.params.id, req.body));
+      const product = await withDbGuard(simulator, () => getRepo().update(req.params.id, req.body));
       if (!product) return res.status(404).json({ error: "Product not found" });
       bus.emitDomain("PRODUCT_UPDATED", `Product updated: ${product.name}`, { productId: product.id });
       res.json({ data: product });
@@ -59,9 +96,9 @@ export function createRestRouter(
     }
   });
 
-  router.delete("/products/:id", async (req, res) => {
+  router.delete("/products/:id", invalidate, async (req, res) => {
     try {
-      const deleted = await withDbGuard(simulator, () => repo.delete(req.params.id));
+      const deleted = await withDbGuard(simulator, () => getRepo().delete(req.params.id));
       if (!deleted) return res.status(404).json({ error: "Product not found" });
       bus.emitDomain("PRODUCT_DELETED", `Product deleted: ${req.params.id}`, { productId: req.params.id });
       res.status(204).send();

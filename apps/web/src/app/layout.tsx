@@ -20,6 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/products">Products (SSR)</a>
               <a href="/graphql-demo">GraphQL Demo</a>
               <a href="/scenarios">Scenarios</a>
+              <a href="/patterns">Patterns</a>
+              <a href="/decisions">Decisions</a>
+              <a href="/debug">Debug</a>
               <a href="/architecture">Architecture</a>
               <a href="http://localhost:5173/scenarios" target="_blank" rel="noreferrer">React vs Next.js →</a>
             </nav>

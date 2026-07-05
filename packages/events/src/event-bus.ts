@@ -33,7 +33,7 @@ export class EventBus {
     return this.publish({ type, category: "domain", message, payload });
   }
 
-  emitOperational(type: Extract<EventType, "API_DEGRADED" | "API_RECOVERED" | "RATE_LIMITED" | "DB_SLOW" | "DB_ERROR" | "DEPLOY_STARTED" | "DEPLOY_COMPLETED" | "TRAFFIC_SPIKE" | "AUTH_REQUIRED">, message: string, payload?: Record<string, unknown>) {
+  emitOperational(type: Extract<EventType, "API_DEGRADED" | "API_RECOVERED" | "RATE_LIMITED" | "DB_SLOW" | "DB_ERROR" | "DEPLOY_STARTED" | "DEPLOY_COMPLETED" | "TRAFFIC_SPIKE" | "AUTH_REQUIRED" | "MIGRATION_DUAL_WRITE" | "CICD_STAGE">, message: string, payload?: Record<string, unknown>) {
     return this.publish({ type, category: "operational", message, payload });
   }
 

@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Interview Stack Guide API
+  version: 1.1.0
+  description: REST API reference for interview preparation — dual API with GraphQL at /graphql
+servers:
+  - url: http://localhost:4000
+paths:
+  /health:
+    get:
+      summary: Health check (liveness)
+      responses:
+        "200":
+          description: API healthy
+        "503":
+          description: API degraded (scenario active)
+  /ready:
+    get:
+      summary: Readiness probe
+      responses:
+        "200":
+          description: Ready to serve traffic
+        "503":
+          description: Not ready (DB unavailable)
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      responses:
+        "200":
+          description: Prometheus text format
+  /api/auth/login:
+    post:
+      summary: Obtain JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 6 }
+      responses:
+        "200":
+          description: Token issued
+        "401":
+          description: Invalid credentials
+  /api/products:
+    get:
+      summary: List products (paginated)
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, maximum: 100 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: cursor
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: inStock
+          in: query
+          schema: { type: string, enum: [true, false] }
+      responses:
+        "200":
+          description: Paginated product list
+    post:
+      summary: Create product (auth required when ENABLE_AUTH=true)
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+  /api/products/{id}:
+    get:
+      summary: Get product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Product found
+        "404":
+          description: Not found
+    put:
+      summary: Update product
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete product
+      responses:
+        "204":
+          description: Deleted
+  /api/events/stream:
+    get:
+      summary: SSE event stream
+      responses:
+        "200":
+          description: text/event-stream
+  /api/events/ws:
+    get:
+      summary: WebSocket event stream (upgrade)
+      responses:
+        "101":
+          description: Switching Protocols
+  /api/scenarios/{id}/trigger:
+    post:
+      summary: Trigger situational scenario
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - traffic_spike
+              - rate_limit
+              - db_slow
+              - db_error
+              - api_degraded
+              - deploy_rolling
+              - auth_required
+              - dual_write_migration
+              - cicd_pipeline
+              - recover

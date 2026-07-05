@@ -38,8 +38,9 @@ export const typeDefs = `#graphql
   }
 
   type Query {
-    products(filter: ProductFilterInput): [Product!]!
+    products(filter: ProductFilterInput, limit: Int, offset: Int, cursor: String): ProductPage!
     product(id: ID!): Product
+    productsByIds(ids: [ID!]!): [Product]!
     productCount: Int!
     events: [AppEvent!]!
     activeScenarios: [String!]!
@@ -66,5 +67,13 @@ export const typeDefs = `#graphql
   type ScenarioResult {
     ok: Boolean!
     message: String!
+  }
+
+  type ProductPage {
+    items: [Product!]!
+    total: Int!
+    limit: Int!
+    offset: Int!
+    nextCursor: String
   }
 `;

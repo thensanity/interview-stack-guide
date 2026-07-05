@@ -28,3 +28,5 @@ export async function createProductRepository(config: DbConfig): Promise<Product
 export * from "./types.js";
 export { MongoProductRepository } from "./mongodb-adapter.js";
 export { DynamoProductRepository } from "./dynamodb-adapter.js";
+export { MockProductRepository } from "./mock-adapter.js";
+export { DualWriteRepository } from "./dual-write-adapter.js";

@@ -20,7 +20,7 @@ export default function GraphQLPage() {
         Same GraphQL endpoint as Next.js — but fetched client-side after hydration
       </p>
 
-      <pre className="code-block">{`query { products { id name price category inStock } }`}</pre>
+      <pre className="code-block">{`query { products { items { id name price category inStock } total } }`}</pre>
 
       {loading && <p className="loading">Loading...</p>}
       {error && <p className="error">{error}</p>}

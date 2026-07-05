@@ -15,7 +15,9 @@ function mockRepo(initialCount = 0): ProductRepository {
       return p as never;
     },
     findAll: async () => products as never,
+    findAllPaginated: async () => ({ items: products as never, total: count, limit: 20, offset: 0, nextCursor: null }),
     findById: async () => null,
+    findByIds: async () => [],
     update: async () => null,
     delete: async () => false,
   };

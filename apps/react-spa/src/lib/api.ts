@@ -25,7 +25,7 @@ export async function fetchProductsRest(): Promise<Product[]> {
 }
 
 export async function fetchProductsGraphQL(): Promise<Product[]> {
-  const query = `query { products { id name description price category inStock } }`;
+  const query = `query { products { items { id name description price category inStock } total } }`;
   const res = await fetch(apiPath("/graphql"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -33,7 +33,7 @@ export async function fetchProductsGraphQL(): Promise<Product[]> {
   });
   if (!res.ok) throw new Error("Failed to fetch via GraphQL");
   const json = await res.json();
-  return json.data.products;
+  return json.data.products.items;
 }
 
 export async function fetchHealth(): Promise<{ status: string; provider: string; deployTarget: string }> {

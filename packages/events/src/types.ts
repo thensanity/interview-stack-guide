@@ -15,7 +15,9 @@ export type OperationalEventType =
   | "DEPLOY_STARTED"
   | "DEPLOY_COMPLETED"
   | "TRAFFIC_SPIKE"
-  | "AUTH_REQUIRED";
+  | "AUTH_REQUIRED"
+  | "MIGRATION_DUAL_WRITE"
+  | "CICD_STAGE";
 
 export type ScenarioId =
   | "traffic_spike"
@@ -25,6 +27,8 @@ export type ScenarioId =
   | "api_degraded"
   | "deploy_rolling"
   | "auth_required"
+  | "dual_write_migration"
+  | "cicd_pipeline"
   | "recover";
 
 export type EventType = DomainEventType | OperationalEventType | "SCENARIO_TRIGGERED";
@@ -96,6 +100,20 @@ export const SCENARIOS: ScenarioDefinition[] = [
     description: "Returns 401 Unauthorized on mutations",
     interviewScenario: "Scenario 9: How would you add authentication?",
     durationMs: 20_000,
+  },
+  {
+    id: "dual_write_migration",
+    name: "Dual-Write Migration",
+    description: "Writes to primary + shadow secondary DB (MongoDB→DynamoDB phase 2)",
+    interviewScenario: "Scenario 2: How would you migrate from MongoDB to DynamoDB?",
+    durationMs: 30_000,
+  },
+  {
+    id: "cicd_pipeline",
+    name: "CI/CD Pipeline",
+    description: "Simulates lint → test → build → deploy → smoke stages",
+    interviewScenario: "Scenario 3: Explain your CI/CD pipeline",
+    durationMs: 15_000,
   },
   {
     id: "recover",

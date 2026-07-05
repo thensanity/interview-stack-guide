@@ -35,6 +35,8 @@ Scenario POST ──▶ ScenarioSimulator ──▶ Middleware (429, 401, latenc
 | `api_degraded` | Scenario 7 | /health → 503 degraded | Status bar shows degraded |
 | `deploy_rolling` | Scenario 7 | DEPLOY_STARTED/COMPLETED events | Event feed |
 | `auth_required` | Scenario 9 | 401 on mutations | Form error |
+| `dual_write_migration` | Scenario 2 | Dual-write to shadow DB | MIGRATION_DUAL_WRITE events |
+| `cicd_pipeline` | Scenario 3 | Staged pipeline events | Event feed shows lint→deploy |
 | `recover` | Rollback | Clears all scenarios | System normal |
 
 ---
