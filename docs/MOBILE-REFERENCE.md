@@ -437,6 +437,8 @@ npm run docker:smoke                    # Verify all services
 npm run docker:down                   # Stop
 ```
 
+**Public deploy (free OSS):** See [docs/deploy-free-oss.md](docs/deploy-free-oss.md) — Docker + Caddy + HTTPS → `https://YOUR_DOMAIN/playground`
+
 **Profiles:** `full` = API + Web + MongoDB in containers
 
 ---

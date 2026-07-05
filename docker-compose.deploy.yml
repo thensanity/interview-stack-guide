@@ -1,0 +1,102 @@
+# Production deployment — 100% free open-source stack
+#
+# Components: Docker Compose + Caddy (TLS) + MongoDB + Redis + API + Next.js
+#
+# Setup:
+#   cp deploy/.env.deploy.example deploy/.env.deploy
+#   # Edit DOMAIN and ACME_EMAIL in deploy/.env.deploy
+#   ./scripts/deploy-oss.sh
+#
+# Or manually:
+#   docker compose -f docker-compose.deploy.yml --env-file deploy/.env.deploy up -d --build
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATA_PROVIDER: mongodb
+      MONGODB_URI: mongodb://mongodb:27017/interview-stack
+      API_PORT: 4000
+      SEED_DATA: "true"
+      DEPLOY_TARGET: ${DEPLOY_TARGET:-kubernetes}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-200}
+      ENABLE_AUTH: ${ENABLE_AUTH:-false}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 25s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # Same-origin: browser calls https://DOMAIN (Caddy routes /api to API)
+        NEXT_PUBLIC_API_URL: https://${DOMAIN}
+        NEXT_PUBLIC_GRAPHQL_URL: https://${DOMAIN}/graphql
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/playground"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
+  caddy_data:
+  caddy_config:

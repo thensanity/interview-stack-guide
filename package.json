@@ -19,6 +19,7 @@
     "docker:down": "docker compose down",
     "docker:full": "docker compose --profile full up -d --build",
     "docker:smoke": "powershell -ExecutionPolicy Bypass -File scripts/smoke-test.ps1",
+    "docker:deploy": "bash scripts/deploy-oss.sh",
     "seed": "SEED_DATA=true npm run dev -w @interview/api"
   },
   "devDependencies": {

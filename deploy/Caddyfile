@@ -1,0 +1,33 @@
+# Caddy reverse proxy — one domain for frontend + API (automatic Let's Encrypt HTTPS)
+# DOMAIN and ACME_EMAIL are read from the caddy container environment.
+
+{$DOMAIN} {
+	email {$ACME_EMAIL}
+
+	handle /health* {
+		reverse_proxy api:4000
+	}
+	handle /ready* {
+		reverse_proxy api:4000
+	}
+	handle /metrics* {
+		reverse_proxy api:4000
+	}
+	handle /openapi.yaml {
+		reverse_proxy api:4000
+	}
+	handle /graphql* {
+		reverse_proxy api:4000
+	}
+	handle /api/* {
+		reverse_proxy api:4000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}
+
+http://{$DOMAIN} {
+	redir https://{host}{uri} permanent
+}

@@ -98,6 +98,7 @@ interview-stack-guide/
 | **ADRs** | [docs/ADR/](docs/ADR/) |
 | **Learning Paths** | [docs/learning-paths/](docs/learning-paths/) |
 | Docker demo | [docs/docker-full-demo.md](docs/docker-full-demo.md) |
+| **Free OSS deploy** | [docs/deploy-free-oss.md](docs/deploy-free-oss.md) |
 
 ## Full Docker Demo (No Node Required)
 
@@ -107,6 +108,19 @@ npm run docker:smoke   # Verify REST, GraphQL, and web
 ```
 
 See [docs/docker-full-demo.md](docs/docker-full-demo.md) for details.
+
+### Free OSS public deploy (Playground + API + HTTPS)
+
+Deploy to any free Linux VM with Docker — Caddy handles HTTPS automatically:
+
+```bash
+cp deploy/.env.deploy.example deploy/.env.deploy
+# Edit DOMAIN and ACME_EMAIL
+./scripts/deploy-oss.sh
+# Open https://YOUR_DOMAIN/playground
+```
+
+Full guide: [docs/deploy-free-oss.md](docs/deploy-free-oss.md)
 
 ### Kubernetes (Helm)
 
