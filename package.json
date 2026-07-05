@@ -20,6 +20,11 @@
     "docker:full": "docker compose --profile full up -d --build",
     "docker:smoke": "powershell -ExecutionPolicy Bypass -File scripts/smoke-test.ps1",
     "docker:deploy": "bash scripts/deploy-oss.sh",
+    "setup": "bash scripts/setup-all.sh",
+    "setup:local": "bash scripts/setup-all.sh local",
+    "setup:dev": "bash scripts/setup-all.sh dev",
+    "setup:public": "bash scripts/setup-all.sh public",
+    "demo": "concurrently -n api,next -c blue,green \"npx tsx apps/api/src/e2e-server.ts\" \"npm run dev -w @interview/web\"",
     "seed": "SEED_DATA=true npm run dev -w @interview/api"
   },
   "devDependencies": {

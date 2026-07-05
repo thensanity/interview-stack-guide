@@ -109,6 +109,13 @@ npm run docker:smoke   # Verify REST, GraphQL, and web
 
 See [docs/docker-full-demo.md](docs/docker-full-demo.md) for details.
 
+### Zero-dependency demo (no Docker, no MongoDB)
+
+```bash
+npm run setup -- demo
+# → http://localhost:3000/playground
+```
+
 ### Free OSS public deploy (Playground + API + HTTPS)
 
 Deploy to any free Linux VM with Docker — Caddy handles HTTPS automatically:
