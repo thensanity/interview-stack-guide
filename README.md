@@ -91,7 +91,11 @@ interview-stack-guide/
 | **Situational Events** | [docs/interview-guide/situational-events.md](docs/interview-guide/situational-events.md) |
 | **Testing** | [docs/interview-guide/testing.md](docs/interview-guide/testing.md) |
 | **Observability** | [docs/interview-guide/observability.md](docs/interview-guide/observability.md) |
+| **Playground** | [docs/interview-guide/playground.md](docs/interview-guide/playground.md) |
+| **Behavioral** | [docs/interview-guide/behavioral.md](docs/interview-guide/behavioral.md) |
+| **SQL vs NoSQL** | [docs/interview-guide/sql-vs-nosql.md](docs/interview-guide/sql-vs-nosql.md) |
 | **Decision Matrix** | [docs/DECISION-MATRIX.md](docs/DECISION-MATRIX.md) |
+| **ADRs** | [docs/ADR/](docs/ADR/) |
 | **Learning Paths** | [docs/learning-paths/](docs/learning-paths/) |
 | Docker demo | [docs/docker-full-demo.md](docs/docker-full-demo.md) |
 

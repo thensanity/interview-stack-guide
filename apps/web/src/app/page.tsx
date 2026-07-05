@@ -86,6 +86,19 @@ export default async function HomePage() {
         </div>
 
         <div className="card">
+          <h3>Interview Playground</h3>
+          <p>Unified demo lab — REST, GraphQL, auth, scenarios, SSE/WebSocket, Swagger UI.</p>
+          <ul>
+            <li>One-click interview demo script</li>
+            <li>GraphiQL + OpenAPI explorer</li>
+            <li>Presenter mode for live interviews</li>
+          </ul>
+          <div style={{ marginTop: "0.75rem" }}>
+            <a href="/playground" className="badge badge-green" style={{ textDecoration: "none" }}>Open Playground →</a>
+          </div>
+        </div>
+
+        <div className="card">
           <h3>AWS / Kubernetes Duality</h3>
           <p>Deploy the same containers to ECS Fargate (AWS) or any K8s cluster.</p>
           <ul>

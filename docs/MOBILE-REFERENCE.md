@@ -22,6 +22,7 @@ One-page index for every tool, concept, command, and interview answer in this re
 | AWS | [Aws] |
 | Kubernetes | [K8s] |
 | Patterns | [Patterns] |
+| Playground | [Playground](#playground) |
 | Interview Q&A | [Qa] |
 | Ports & URLs | [Ports] |
 
@@ -389,6 +390,25 @@ Full scenarios: `docs/interview-guide/scenarios.md`
 
 ---
 
+## Playground
+
+**One URL to demo everything:** http://localhost:3000/playground
+
+| Tab | Demo |
+|-----|------|
+| REST | Send API requests, see X-Cache header |
+| GraphQL | GraphiQL explorer + DataLoader |
+| Auth | Login → JWT → mutations |
+| Scenarios | Trigger failures + 28s demo script |
+| SSE / WS | Side-by-side event transports |
+| OpenAPI | Swagger UI |
+
+**Presenter:** http://localhost:3000/playground/demo
+
+**Guide search:** http://localhost:3000/guide
+
+---
+
 ## Ports
 
 | Service | URL |
@@ -402,6 +422,9 @@ Full scenarios: `docs/interview-guide/scenarios.md`
 | Scenarios (Next) | http://localhost:3000/scenarios |
 | Scenarios (React) | http://localhost:5173/scenarios |
 | Compare page | http://localhost:5173/compare |
+| **Playground** | http://localhost:3000/playground |
+| Presenter mode | http://localhost:3000/playground/demo |
+| Guide search | http://localhost:3000/guide |
 
 ---
 
@@ -434,6 +457,10 @@ npm run docker:down                   # Stop
 | `docs/interview-guide/kubernetes.md` | K8s objects |
 | `docs/interview-guide/scenarios.md` | 12 interview scenarios |
 | `docs/interview-guide/situational-events.md` | Runnable event demos |
+| `docs/interview-guide/playground.md` | Interactive demo lab |
+| `docs/interview-guide/behavioral.md` | STAR interview stories |
+| `docs/interview-guide/sql-vs-nosql.md` | SQL vs NoSQL |
+| `docs/DECISION-MATRIX.md` | When to use what |
 | `docs/docker-full-demo.md` | Docker end-to-end |
 
 ---

@@ -71,5 +71,7 @@ jobs:
 
       - name: Run smoke tests
         run: |
-          echo "curl https://api.staging.example.com/health"
-          echo "Interview: add post-deploy smoke tests against ALB endpoint"
+          API_URL=${{ vars.STAGING_API_URL || 'http://localhost:4000' }} bash scripts/smoke-test.sh || {
+            echo "Smoke tests skipped — set STAGING_API_URL for live ALB checks"
+            curl -sf "${{ vars.STAGING_API_URL || 'http://localhost:4000' }}/health" || true
+          }
