@@ -62,6 +62,12 @@ export class ScenarioSimulator {
       case "auth_required":
         this.bus.emitOperational("AUTH_REQUIRED", "Mutations require authentication — expect 401");
         break;
+      case "dual_write_migration":
+        this.bus.emitOperational("MIGRATION_DUAL_WRITE", "Dual-write active — writes go to primary + shadow secondary");
+        break;
+      case "cicd_pipeline":
+        this.simulateCicdPipeline();
+        break;
     }
 
     return { ok: true, message: `Scenario '${def.name}' active for ${def.durationMs / 1000}s` };
@@ -105,6 +111,31 @@ export class ScenarioSimulator {
   async applyLatency(): Promise<void> {
     const ms = this.getLatencyMs();
     if (ms > 0) await new Promise((r) => setTimeout(r, ms));
+  }
+
+  isDualWriteActive(): boolean {
+    return this.isActive("dual_write_migration");
+  }
+
+  private simulateCicdPipeline() {
+    const stages = [
+      { stage: "lint", delay: 0 },
+      { stage: "test", delay: 2000 },
+      { stage: "build", delay: 4000 },
+      { stage: "deploy", delay: 6000 },
+      { stage: "smoke", delay: 8000 },
+    ];
+    for (const { stage, delay } of stages) {
+      setTimeout(() => {
+        this.bus.emitOperational("CICD_STAGE", `CI/CD stage: ${stage}`, { stage, status: "passed" });
+        if (stage === "deploy") {
+          this.bus.emitOperational("DEPLOY_STARTED", "Pipeline deploying to staging");
+        }
+        if (stage === "smoke") {
+          this.bus.emitOperational("DEPLOY_COMPLETED", "Pipeline complete — smoke tests passed");
+        }
+      }, delay);
+    }
   }
 
   streamSse(res: Response): () => void {

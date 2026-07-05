@@ -89,6 +89,10 @@ interview-stack-guide/
 | Kubernetes | [docs/interview-guide/kubernetes.md](docs/interview-guide/kubernetes.md) |
 | **Scenarios (12)** | [docs/interview-guide/scenarios.md](docs/interview-guide/scenarios.md) |
 | **Situational Events** | [docs/interview-guide/situational-events.md](docs/interview-guide/situational-events.md) |
+| **Testing** | [docs/interview-guide/testing.md](docs/interview-guide/testing.md) |
+| **Observability** | [docs/interview-guide/observability.md](docs/interview-guide/observability.md) |
+| **Decision Matrix** | [docs/DECISION-MATRIX.md](docs/DECISION-MATRIX.md) |
+| **Learning Paths** | [docs/learning-paths/](docs/learning-paths/) |
 | Docker demo | [docs/docker-full-demo.md](docs/docker-full-demo.md) |
 
 ## Full Docker Demo (No Node Required)
@@ -122,6 +126,11 @@ terraform init && terraform apply
 2. **Adapter Pattern** — MongoDB vs DynamoDB implementations
 3. **Dual API** — REST + GraphQL over same data layer
 4. **Dual Cloud** — same Docker images deploy to ECS or Kubernetes
+5. **JWT Auth** — optional `ENABLE_AUTH=true` for mutation protection
+6. **Redis Cache** — optional cache-aside for product reads (`REDIS_URL`)
+7. **DataLoader** — GraphQL N+1 batching
+8. **Observability** — structured logs + Prometheus `/metrics`
+9. **Runnable Scenarios** — 10 failure/ops scenarios including CI/CD and migration
 
 ## API Endpoints
 
@@ -129,8 +138,12 @@ terraform init && terraform apply
 |--------|------|-------------|
 | GET | `/health` | Health check (K8s liveness) |
 | GET | `/ready` | Readiness probe |
-| GET | `/api/products` | REST list products |
-| POST | `/api/products` | REST create product |
+| GET | `/api/products` | REST list products (paginated, cached with Redis) |
+| POST | `/api/products` | REST create product (Zod validated) |
+| POST | `/api/auth/login` | Obtain JWT token |
+| GET | `/metrics` | Prometheus metrics |
+| GET | `/openapi.yaml` | OpenAPI 3.0 spec |
+| WS | `/api/events/ws` | WebSocket event stream |
 | POST | `/graphql` | GraphQL endpoint |
 
 ## License

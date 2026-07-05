@@ -13,6 +13,8 @@ import type {
   ProductFilter,
   CreateProductInput,
   UpdateProductInput,
+  PaginationOptions,
+  PaginatedResult,
 } from "./types.js";
 
 /** DynamoDB adapter — key-value / document NoSQL on AWS (interview: single-table design, GSI, eventual consistency) */
@@ -58,11 +60,34 @@ export class DynamoProductRepository implements ProductRepository {
     );
   }
 
+  async findAllPaginated(
+    filter?: ProductFilter,
+    options?: PaginationOptions
+  ): Promise<PaginatedResult<Product>> {
+    const all = await this.findAll(filter);
+    const limit = Math.min(options?.limit ?? 20, 100);
+    const offset = options?.cursor ? parseInt(options.cursor, 10) : (options?.offset ?? 0);
+    const items = all.slice(offset, offset + limit);
+    const nextOffset = offset + limit;
+    return {
+      items,
+      total: all.length,
+      limit,
+      offset,
+      nextCursor: nextOffset < all.length ? String(nextOffset) : null,
+    };
+  }
+
   async findById(id: string): Promise<Product | null> {
     const result = await this.docClient.send(
       new GetCommand({ TableName: this.tableName, Key: { id } })
     );
     return (result.Item as Product) ?? null;
+  }
+
+  async findByIds(ids: string[]): Promise<Product[]> {
+    const results = await Promise.all(ids.map((id) => this.findById(id)));
+    return results.filter((p): p is Product => p !== null);
   }
 
   async create(input: CreateProductInput): Promise<Product> {

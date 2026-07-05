@@ -1,5 +1,8 @@
 import type { ProductRepository } from "@interview/db";
 import type { EventBus, ScenarioId } from "@interview/events";
+import type DataLoader from "dataloader";
+import type { Product } from "@interview/db";
+import { createProductLoader } from "./dataloaders.js";
 
 export interface GraphQLContext {
   repo: ProductRepository;
@@ -7,6 +10,9 @@ export interface GraphQLContext {
   events: EventBus;
   getActiveScenarios: () => ScenarioId[];
   triggerScenario: (id: ScenarioId) => { ok: boolean; message: string };
+  loaders: {
+    product: DataLoader<string, Product | null>;
+  };
 }
 
 async function dbOp<T>(ctx: GraphQLContext, fn: () => Promise<T>, onDbError?: () => boolean): Promise<T> {
@@ -14,17 +20,54 @@ async function dbOp<T>(ctx: GraphQLContext, fn: () => Promise<T>, onDbError?: ()
   return fn();
 }
 
+export function createGraphQLContext(
+  repo: ProductRepository,
+  dataProvider: string,
+  events: EventBus,
+  getActiveScenarios: () => ScenarioId[],
+  triggerScenario: (id: ScenarioId) => { ok: boolean; message: string }
+): GraphQLContext {
+  return {
+    repo,
+    dataProvider,
+    events,
+    getActiveScenarios,
+    triggerScenario,
+    loaders: {
+      product: createProductLoader(repo),
+    },
+  };
+}
+
 export function createResolvers(onDbError?: () => boolean) {
   return {
     Query: {
       products: async (
         _: unknown,
-        args: { filter?: { category?: string; inStock?: boolean; minPrice?: number; maxPrice?: number } },
+        args: {
+          filter?: { category?: string; inStock?: boolean; minPrice?: number; maxPrice?: number };
+          limit?: number;
+          offset?: number;
+          cursor?: string;
+        },
         ctx: GraphQLContext
-      ) => dbOp(ctx, () => ctx.repo.findAll(args.filter), onDbError),
+      ) =>
+        dbOp(
+          ctx,
+          () =>
+            ctx.repo.findAllPaginated(args.filter, {
+              limit: args.limit,
+              offset: args.offset,
+              cursor: args.cursor,
+            }),
+          onDbError
+        ),
 
       product: async (_: unknown, args: { id: string }, ctx: GraphQLContext) =>
-        dbOp(ctx, () => ctx.repo.findById(args.id), onDbError),
+        dbOp(ctx, () => ctx.loaders.product.load(args.id), onDbError),
+
+      productsByIds: async (_: unknown, args: { ids: string[] }, ctx: GraphQLContext) =>
+        dbOp(ctx, () => ctx.loaders.product.loadMany(args.ids), onDbError),
 
       productCount: async (_: unknown, __: unknown, ctx: GraphQLContext) =>
         dbOp(ctx, () => ctx.repo.count(), onDbError),
@@ -36,6 +79,14 @@ export function createResolvers(onDbError?: () => boolean) {
       health: () => "ok",
 
       dataProvider: (_: unknown, __: unknown, ctx: GraphQLContext) => ctx.dataProvider,
+    },
+
+    ProductPage: {
+      items: (page: { items: Product[] }) => page.items,
+      total: (page: { total: number }) => page.total,
+      limit: (page: { limit: number }) => page.limit,
+      offset: (page: { offset: number }) => page.offset,
+      nextCursor: (page: { nextCursor: string | null }) => page.nextCursor,
     },
 
     Mutation: {

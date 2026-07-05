@@ -14,7 +14,7 @@ export default async function GraphQLDemoPage() {
   }
 
   const query = `query GetProducts {
-  products { id name price category inStock }
+  products { items { id name price category inStock } total nextCursor }
   dataProvider
 }`;
 

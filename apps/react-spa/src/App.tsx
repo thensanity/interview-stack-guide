@@ -4,6 +4,7 @@ import ProductsPage from "./pages/ProductsPage";
 import GraphQLPage from "./pages/GraphQLPage";
 import ComparePage from "./pages/ComparePage";
 import ScenariosPage from "./pages/ScenariosPage";
+import PatternsPage from "./pages/PatternsPage";
 import OfflineBanner from "./components/OfflineBanner";
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
             <NavLink to="/products">Products (CSR)</NavLink>
             <NavLink to="/graphql">GraphQL Demo</NavLink>
             <NavLink to="/scenarios">Scenarios</NavLink>
+            <NavLink to="/patterns">Patterns</NavLink>
             <NavLink to="/compare">React vs Next.js</NavLink>
             <a href="http://localhost:3000" target="_blank" rel="noreferrer">Open Next.js →</a>
           </nav>
@@ -31,6 +33,7 @@ export default function App() {
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/graphql" element={<GraphQLPage />} />
           <Route path="/scenarios" element={<ScenariosPage />} />
+          <Route path="/patterns" element={<PatternsPage />} />
           <Route path="/compare" element={<ComparePage />} />
         </Routes>
       </main>

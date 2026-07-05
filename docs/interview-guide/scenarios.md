@@ -175,6 +175,8 @@ Scenarios 5, 7, 8, 9 are now **triggerable in the app** at `/scenarios`:
 | 7 Zero-downtime deploy | `deploy_rolling` | Deploy events in feed |
 | 8 Debugging races | `db_slow` | 2s latency |
 | 9 Authentication | `auth_required` | 401 on mutations |
+| 2 DB migration | `dual_write_migration` | Dual-write events |
+| 3 CI/CD pipeline | `cicd_pipeline` | Staged deploy events |
 | 10 CAP / availability | `db_error` | 503 on next DB call |
 
 See [situational-events.md](./situational-events.md) for full implementation guide.
