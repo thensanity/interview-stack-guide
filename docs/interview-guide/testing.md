@@ -18,8 +18,12 @@ Testing pyramid implemented in this repo — interview talking points with real 
 | events | `packages/events/src/event-bus.test.ts` | Pub/sub, history |
 | db | `packages/db/src/repository.test.ts` | Pagination, dual-write |
 | api | `apps/api/src/config.test.ts` | Config loading |
+| react-spa | `apps/react-spa/src/lib/auth.test.ts` | Auth storage helpers |
+| react-spa | `apps/react-spa/src/components/ProductForm.test.tsx` | Client form submit |
+| web | `apps/web/src/lib/auth.test.ts` | Auth header helpers |
+| web | `apps/web/src/app/products/actions.test.ts` | Server Action mutation |
 
-Run: `npm run test -w @interview/validation`
+Run: `npm run test -w @interview/react-spa` or `npm run test -w @interview/web`
 
 ## Integration Tests
 

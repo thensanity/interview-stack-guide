@@ -1,59 +1,59 @@
-import { useEffect, useState } from "react";
-import { fetchProductsRest, createProduct, type Product } from "../lib/api";
-import { fetchWithRetry } from "../lib/events";
+import { Link } from "react-router-dom";
+import { useProducts } from "../hooks/useProducts";
+import { useAuth } from "../context/AuthContext";
+import { createProduct } from "../lib/api";
 import ProductForm from "../components/ProductForm";
 
-/** Classic CSR pattern — fetch after mount, show loading state */
+/** Classic CSR pattern — useProducts hook with cursor pagination */
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  function loadProducts() {
-    setLoading(true);
-    setError(null);
-    fetchWithRetry(() => fetchProductsRest())
-      .then(setProducts)
-      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load"))
-      .finally(() => setLoading(false));
-  }
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
+  const { token, isAuthenticated } = useAuth();
+  const { products, total, loading, loadingMore, error, hasMore, loadMore, refresh } = useProducts(5);
 
   async function handleCreate(input: { name: string; description: string; price: number; category: string }) {
-    await createProduct(input);
-    loadProducts();
+    await createProduct(input, token);
+    refresh();
   }
 
   return (
     <>
       <h2 style={{ marginBottom: "0.5rem" }}>Products (CSR + REST)</h2>
       <p style={{ color: "var(--muted)", marginBottom: "1rem", fontSize: "0.9rem" }}>
-        Data fetched in <code>useEffect</code> after component mounts — interview contrast with Next.js SSR
+        Data fetched via <code>useProducts</code> hook with cursor pagination — contrast with Next.js searchParams.
       </p>
 
       {loading && <p className="loading">Loading products...</p>}
       {error && <p className="error">API unavailable: {error}</p>}
 
       {!loading && !error && (
-        <div className="product-list">
-          {products.map((p) => (
-            <div key={p.id} className="product-item">
-              <div>
-                <h4>{p.name}</h4>
-                <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>{p.description}</p>
-                <div className="meta">{p.category} · {p.inStock ? "In stock" : "Out of stock"}</div>
-              </div>
-              <div className="price">${p.price.toFixed(2)}</div>
-            </div>
-          ))}
-          {products.length === 0 && <p className="loading">No products yet.</p>}
-        </div>
+        <>
+          <p style={{ color: "var(--muted)", fontSize: "0.85rem", marginBottom: "0.75rem" }}>
+            Showing {products.length} of {total} products
+          </p>
+          <div className="product-list">
+            {products.map((p) => (
+              <Link key={p.id} to={`/products/${p.id}`} className="product-item product-link">
+                <div>
+                  <h4>{p.name}</h4>
+                  <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>{p.description}</p>
+                  <div className="meta">{p.category} · {p.inStock ? "In stock" : "Out of stock"}</div>
+                </div>
+                <div className="price">${p.price.toFixed(2)}</div>
+              </Link>
+            ))}
+            {products.length === 0 && <p className="loading">No products yet.</p>}
+          </div>
+
+          <div className="pagination-bar">
+            {hasMore && (
+              <button type="button" className="scenario-btn" onClick={loadMore} disabled={loadingMore}>
+                {loadingMore ? "Loading…" : "Load more"}
+              </button>
+            )}
+          </div>
+        </>
       )}
 
-      <ProductForm onCreate={handleCreate} />
+      <ProductForm onCreate={handleCreate} authRequired={isAuthenticated} />
     </>
   );
 }

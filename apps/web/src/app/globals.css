@@ -197,3 +197,49 @@ nav a:hover { color: var(--accent); }
   font-size: 0.8rem;
   color: var(--muted);
 }
+
+.auth-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.auth-form { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.auth-form input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+.auth-error { color: #f87171; }
+.auth-hint { color: var(--muted); font-size: 0.75rem; }
+
+.pagination-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+.product-link {
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+.product-link:hover { border-color: var(--accent); }
+
+.product-detail-meta {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-top: 1rem;
+}
