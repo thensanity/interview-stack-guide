@@ -83,6 +83,9 @@ CRA is deprecated. **Vite** is the modern choice:
 | File | Purpose |
 |------|---------|
 | `apps/react-spa/src/main.tsx` | App entry + BrowserRouter |
-| `apps/react-spa/src/pages/ProductsPage.tsx` | CSR data fetching |
+| `apps/react-spa/src/context/AuthContext.tsx` | JWT auth via Context + localStorage |
+| `apps/react-spa/src/hooks/useProducts.ts` | Cursor pagination hook |
+| `apps/react-spa/src/pages/ProductsPage.tsx` | CSR data fetching + Load more |
+| `apps/react-spa/src/pages/ProductDetailPage.tsx` | Dynamic route `/products/:id` |
 | `apps/react-spa/src/pages/ComparePage.tsx` | Side-by-side comparison table |
 | `apps/react-spa/vite.config.ts` | Dev proxy to API |

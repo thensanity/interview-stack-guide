@@ -1,6 +1,9 @@
 import { Routes, Route, NavLink } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import LoginPanel from "./components/LoginPanel";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import GraphQLPage from "./pages/GraphQLPage";
 import ComparePage from "./pages/ComparePage";
 import ScenariosPage from "./pages/ScenariosPage";
@@ -9,7 +12,7 @@ import OfflineBanner from "./components/OfflineBanner";
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <OfflineBanner />
       <header className="header">
         <div className="container header-inner">
@@ -26,11 +29,15 @@ export default function App() {
             <a href="http://localhost:3000" target="_blank" rel="noreferrer">Open Next.js →</a>
           </nav>
         </div>
+        <div className="container">
+          <LoginPanel />
+        </div>
       </header>
       <main className="container">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/graphql" element={<GraphQLPage />} />
           <Route path="/scenarios" element={<ScenariosPage />} />
           <Route path="/patterns" element={<PatternsPage />} />
@@ -42,6 +49,6 @@ export default function App() {
           Plain React + Vite + React Router — compare with Next.js at localhost:3000
         </div>
       </footer>
-    </>
+    </AuthProvider>
   );
 }

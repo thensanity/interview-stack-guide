@@ -78,6 +78,36 @@ export default async function PatternsPage() {
       interview: "View source on /products in both apps",
     },
     {
+      name: "Server Actions",
+      location: "apps/web/src/app/products/actions.ts",
+      use: "createProductAction + revalidatePath — no manual refresh",
+      interview: "Compare with React client fetch mutation",
+    },
+    {
+      name: "Suspense Streaming",
+      location: "apps/web/src/app/products/page.tsx",
+      use: "Async ProductList inside Suspense boundary",
+      interview: "Contrast with route-level loading.tsx",
+    },
+    {
+      name: "URL Pagination",
+      location: "apps/web/src/components/ProductPagination.tsx",
+      use: "Cursor in searchParams — shareable paginated URLs",
+      interview: "Compare with React useProducts hook state",
+    },
+    {
+      name: "Dynamic Routes + SEO",
+      location: "apps/web/src/app/products/[id]/page.tsx",
+      use: "generateMetadata for product detail pages",
+      interview: "View page source for title and meta tags",
+    },
+    {
+      name: "JWT Auth UI",
+      location: "apps/web/src/components/LoginPanel.tsx",
+      use: "Login sets cookie for Server Actions + localStorage for client",
+      interview: "Set ENABLE_AUTH=true to require token on mutations",
+    },
+    {
       name: "Error Boundaries",
       location: "apps/web/src/app/products/error.tsx",
       use: "File-based error UI in Next.js App Router",
