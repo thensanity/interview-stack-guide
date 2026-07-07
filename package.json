@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev": "concurrently -n api,next,react -c blue,green,cyan \"npm run dev -w @interview/api\" \"npm run dev -w @interview/web\" \"npm run dev -w @interview/react-spa\"",
+    "dev:demo": "concurrently -n api,next,react -c blue,green,cyan \"npm run dev:demo -w @interview/api\" \"npm run dev -w @interview/web -- -H 0.0.0.0\" \"npm run dev -w @interview/react-spa -- --host 0.0.0.0\"",
     "dev:next": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/web\"",
     "dev:react": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/react-spa\"",
     "build": "npm run build -w @interview/validation && npm run build -w @interview/db && npm run build -w @interview/events && npm run build -w @interview/graphql && npm run build -w @interview/api && npm run build -w @interview/web && npm run build -w @interview/react-spa",
