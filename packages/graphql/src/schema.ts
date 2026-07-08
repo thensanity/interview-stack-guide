@@ -55,6 +55,11 @@ export const typeDefs = `#graphql
     triggerScenario(id: String!): ScenarioResult!
   }
 
+  type Subscription {
+    """Demo schema — production uses SSE at /api/events/stream or graphql-ws"""
+    eventAdded: AppEvent!
+  }
+
   type AppEvent {
     id: ID!
     type: String!

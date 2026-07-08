@@ -20,6 +20,7 @@ export function loadConfig(): AppConfig {
     db: {
       provider,
       mongodbUri: process.env.MONGODB_URI,
+      postgresUri: process.env.POSTGRES_URI ?? process.env.DATABASE_URL,
       dynamodb: {
         tableName: process.env.DYNAMODB_TABLE ?? "Products",
         region: process.env.AWS_REGION ?? "us-east-1",
@@ -34,12 +35,12 @@ export function loadConfig(): AppConfig {
         {
           email: "admin@interview.local",
           password: "interview123",
-          user: { id: "1", email: "admin@interview.local", role: "admin" },
+          user: { id: "1", email: "admin@interview.local", role: "admin" as const },
         },
         {
           email: "viewer@interview.local",
           password: "viewer123",
-          user: { id: "2", email: "viewer@interview.local", role: "viewer" },
+          user: { id: "2", email: "viewer@interview.local", role: "viewer" as const },
         },
       ],
     },

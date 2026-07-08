@@ -1,14 +1,15 @@
 import { Routes, Route, NavLink } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import LoginPanel from "./components/LoginPanel";
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import GraphQLPage from "./pages/GraphQLPage";
 import ComparePage from "./pages/ComparePage";
-import ScenariosPage from "./pages/ScenariosPage";
 import PatternsPage from "./pages/PatternsPage";
 import OfflineBanner from "./components/OfflineBanner";
+import { LazyRoute, LazyScenariosPage } from "./components/LazyRoutes";
 
 export default function App() {
   return (
@@ -26,7 +27,7 @@ export default function App() {
             <NavLink to="/scenarios">Scenarios</NavLink>
             <NavLink to="/patterns">Patterns</NavLink>
             <NavLink to="/compare">React vs Next.js</NavLink>
-            <a href="http://localhost:3000" target="_blank" rel="noreferrer">Open Next.js →</a>
+            <a href="http://localhost:3000/advanced" target="_blank" rel="noreferrer">Next.js Advanced →</a>
           </nav>
         </div>
         <div className="container">
@@ -34,15 +35,17 @@ export default function App() {
         </div>
       </header>
       <main className="container">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
-          <Route path="/graphql" element={<GraphQLPage />} />
-          <Route path="/scenarios" element={<ScenariosPage />} />
-          <Route path="/patterns" element={<PatternsPage />} />
-          <Route path="/compare" element={<ComparePage />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/:id" element={<ProductDetailPage />} />
+            <Route path="/graphql" element={<GraphQLPage />} />
+            <Route path="/scenarios" element={<LazyRoute><LazyScenariosPage /></LazyRoute>} />
+            <Route path="/patterns" element={<PatternsPage />} />
+            <Route path="/compare" element={<ComparePage />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
       <footer className="footer">
         <div className="container">

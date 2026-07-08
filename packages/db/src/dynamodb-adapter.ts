@@ -5,6 +5,7 @@ import {
   GetCommand,
   DeleteCommand,
   ScanCommand,
+  QueryCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import type {
@@ -53,6 +54,21 @@ export class DynamoProductRepository implements ProductRepository {
   }
 
   async findAll(filter?: ProductFilter): Promise<Product[]> {
+    if (filter?.category) {
+      const result = await this.docClient.send(
+        new QueryCommand({
+          TableName: this.tableName,
+          IndexName: "category-index",
+          KeyConditionExpression: "category = :cat",
+          ExpressionAttributeValues: { ":cat": filter.category },
+        })
+      );
+      const items = (result.Items ?? []) as Product[];
+      return items.filter((p) => this.matchesFilter(p, { ...filter, category: undefined })).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+
     const result = await this.docClient.send(new ScanCommand({ TableName: this.tableName }));
     const items = (result.Items ?? []) as Product[];
     return items.filter((p) => this.matchesFilter(p, filter)).sort(

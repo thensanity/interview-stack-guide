@@ -1,0 +1,16 @@
+{
+  "name": "Interview Stack Guide",
+  "short_name": "StackGuide",
+  "description": "Full-stack interview reference PWA demo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#38bdf8",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

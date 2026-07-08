@@ -10,6 +10,7 @@
   "dependencies": {
     "@interview/db": "*",
     "@interview/events": "*",
+    "@interview/types": "*",
     "dataloader": "^2.2.3",
     "graphql": "^16.10.0"
   },

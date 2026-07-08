@@ -3,6 +3,7 @@ import "./globals.css";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { LoginPanel } from "@/components/LoginPanel";
 import { AuthProvider } from "@/context/AuthProvider";
+import { WebVitalsReporter } from "@/components/WebVitalsReporter";
 
 export const metadata: Metadata = {
   title: "Interview Stack Guide",
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <AuthProvider>
+          <WebVitalsReporter />
           <OfflineBanner />
           <header className="header">
             <div className="container">
@@ -24,6 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <a href="/graphql-demo">GraphQL Demo</a>
                 <a href="/scenarios">Scenarios</a>
                 <a href="/patterns">Patterns</a>
+                <a href="/advanced">Advanced</a>
+                <a href="/admin">Admin</a>
                 <a href="/decisions">Decisions</a>
                 <a href="/debug">Debug</a>
                 <a href="/architecture">Architecture</a>

@@ -167,10 +167,111 @@ resource "aws_security_group" "ecs" {
     security_groups = [aws_security_group.alb.id]
   }
 
+  ingress {
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_ecs_task_definition" "web" {
+  family                   = "${var.app_name}-web"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "256"
+  memory                   = "512"
+  execution_role_arn       = aws_iam_role.ecs_execution.arn
+
+  container_definitions = jsonencode([{
+    name  = "web"
+    image = "${aws_ecr_repository.web.repository_url}:latest"
+    portMappings = [{ containerPort = 3000, protocol = "tcp" }]
+    environment = [
+      { name = "NEXT_PUBLIC_API_URL", value = "https://${var.domain_name}/api" },
+      { name = "NEXT_PUBLIC_GRAPHQL_URL", value = "https://${var.domain_name}/graphql" }
+    ]
+    logConfiguration = {
+      logDriver = "awslogs"
+      options = {
+        "awslogs-group"         = aws_cloudwatch_log_group.web.name
+        "awslogs-region"        = var.aws_region
+        "awslogs-stream-prefix" = "web"
+      }
+    }
+    healthCheck = {
+      command     = ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval    = 30
+      timeout     = 5
+      retries     = 3
+      startPeriod = 60
+    }
+  }])
+}
+
+resource "aws_lb_target_group" "web" {
+  name        = "${var.app_name}-web-tg"
+  port        = 3000
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+  target_type = "ip"
+
+  health_check {
+    path                = "/"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    timeout             = 5
+    interval            = 30
+  }
+}
+
+resource "aws_lb_listener_rule" "web" {
+  listener_arn = aws_lb_listener.api.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/", "/products*", "/advanced*", "/admin*"]
+    }
+  }
+}
+
+resource "aws_ecs_service" "web" {
+  name            = "interview-web"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.web.arn
+  desired_count   = 2
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = aws_subnet.private[*].id
+    security_groups  = [aws_security_group.ecs.id]
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.web.arn
+    container_name   = "web"
+    container_port   = 3000
+  }
+
+  depends_on = [aws_lb_listener_rule.web]
+}
+
+variable "domain_name" {
+  type        = string
+  description = "Public domain for web/API routing"
+  default     = "interview.example.com"
 }

@@ -17,6 +17,7 @@
     "@interview/db": "*",
     "@interview/events": "*",
     "@interview/graphql": "*",
+    "@interview/types": "*",
     "@interview/validation": "*",
     "cors": "^2.8.5",
     "express": "^4.21.2",

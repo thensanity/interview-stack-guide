@@ -11,6 +11,10 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@apollo/client": "^3.13.4",
+    "@tanstack/react-query": "^5.68.0",
+    "graphql": "^16.10.0",
+    "msw": "^2.7.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0"

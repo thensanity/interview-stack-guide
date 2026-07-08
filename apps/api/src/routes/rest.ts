@@ -12,6 +12,9 @@ import {
 import { validateBody, validateQuery } from "../middleware/validation.js";
 import type { CacheService } from "../middleware/cache.js";
 import { invalidateProductCache } from "../middleware/cache.js";
+import { requireAdmin } from "../middleware/rbac.js";
+import { appendOutbox } from "../outbox/outbox.js";
+import { jobQueue } from "../jobs/queue.js";
 
 type ValidatedQuery = {
   category?: string;
@@ -79,6 +82,8 @@ export function createRestRouter(
     try {
       const product = await withDbGuard(simulator, () => getRepo().create(req.body));
       bus.emitDomain("PRODUCT_CREATED", `Product created: ${product.name}`, { productId: product.id });
+      appendOutbox("Product", product.id, "PRODUCT_CREATED", { productId: product.id, name: product.name });
+      void jobQueue.enqueue("PRODUCT_INDEX", { productId: product.id, name: product.name });
       res.status(201).json({ data: product });
     } catch {
       res.status(503).json({ error: "Database unavailable", scenario: "db_error" });
@@ -96,7 +101,7 @@ export function createRestRouter(
     }
   });
 
-  router.delete("/products/:id", invalidate, async (req, res) => {
+  router.delete("/products/:id", requireAdmin, invalidate, async (req, res) => {
     try {
       const deleted = await withDbGuard(simulator, () => getRepo().delete(req.params.id));
       if (!deleted) return res.status(404).json({ error: "Product not found" });

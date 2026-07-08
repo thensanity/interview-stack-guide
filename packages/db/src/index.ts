@@ -1,6 +1,7 @@
 import type { DbConfig, ProductRepository } from "./types.js";
 import { MongoProductRepository } from "./mongodb-adapter.js";
 import { DynamoProductRepository } from "./dynamodb-adapter.js";
+import { PostgresProductRepository } from "./postgres-adapter.js";
 
 /** Factory pattern — interview: explain how env-driven provider selection enables cloud portability */
 export async function createProductRepository(config: DbConfig): Promise<ProductRepository> {
@@ -20,6 +21,9 @@ export async function createProductRepository(config: DbConfig): Promise<Product
         secretAccessKey: config.dynamodb.secretAccessKey,
       });
     }
+    case "postgres": {
+      return PostgresProductRepository.connect(config.postgresUri);
+    }
     default:
       throw new Error(`Unknown provider: ${config.provider satisfies never}`);
   }
@@ -28,5 +32,6 @@ export async function createProductRepository(config: DbConfig): Promise<Product
 export * from "./types.js";
 export { MongoProductRepository } from "./mongodb-adapter.js";
 export { DynamoProductRepository } from "./dynamodb-adapter.js";
+export { PostgresProductRepository } from "./postgres-adapter.js";
 export { MockProductRepository } from "./mock-adapter.js";
 export { DualWriteRepository } from "./dual-write-adapter.js";

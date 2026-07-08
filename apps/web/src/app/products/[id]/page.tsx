@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { fetchProductById } from "@/lib/api";
+import { fetchProductById, fetchProductsPaginated } from "@/lib/api";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export async function generateStaticParams() {
+  try {
+    const result = await fetchProductsPaginated({ limit: 10 });
+    return result.items.map((p) => ({ id: p.id }));
+  } catch {
+    return [{ id: "demo-1" }, { id: "demo-2" }];
+  }
 }
 
 /** Dynamic SEO metadata — interview: generateMetadata for product pages */
@@ -37,6 +47,13 @@ export default async function ProductDetailPage({ params }: Props) {
       </nav>
 
       <article className="card product-detail">
+        <Image
+          src={`https://placehold.co/120x120/1e293b/94a3b8?text=${encodeURIComponent(product.category)}`}
+          alt={product.name}
+          width={120}
+          height={120}
+          style={{ borderRadius: 8, marginBottom: "1rem" }}
+        />
         <h2>{product.name}</h2>
         <p style={{ color: "var(--muted)", margin: "0.75rem 0" }}>{product.description}</p>
         <div className="product-detail-meta">

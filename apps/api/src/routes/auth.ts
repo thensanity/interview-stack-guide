@@ -16,6 +16,14 @@ export function createAuthRouter(auth: AuthService): Router {
     res.json({ data: result });
   });
 
+  router.post("/refresh", (req, res) => {
+    const refreshToken = req.body?.refreshToken as string | undefined;
+    if (!refreshToken) return res.status(400).json({ error: "refreshToken required" });
+    const result = auth.refresh(refreshToken);
+    if (!result) return res.status(401).json({ error: "Invalid or expired refresh token" });
+    res.json({ data: result });
+  });
+
   router.get("/me", (req, res) => {
     if (!req.user) {
       return res.status(401).json({ error: "Not authenticated" });

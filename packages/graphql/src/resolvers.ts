@@ -2,6 +2,7 @@ import type { ProductRepository } from "@interview/db";
 import type { EventBus, ScenarioId } from "@interview/events";
 import type DataLoader from "dataloader";
 import type { Product } from "@interview/db";
+import type { AuthUser } from "@interview/types";
 import { createProductLoader } from "./dataloaders.js";
 
 export interface GraphQLContext {
@@ -10,6 +11,7 @@ export interface GraphQLContext {
   events: EventBus;
   getActiveScenarios: () => ScenarioId[];
   triggerScenario: (id: ScenarioId) => { ok: boolean; message: string };
+  user?: AuthUser;
   loaders: {
     product: DataLoader<string, Product | null>;
   };
@@ -18,6 +20,15 @@ export interface GraphQLContext {
 async function dbOp<T>(ctx: GraphQLContext, fn: () => Promise<T>, onDbError?: () => boolean): Promise<T> {
   if (onDbError?.()) throw new Error("Simulated database failure");
   return fn();
+}
+
+function assertAuth(ctx: GraphQLContext, enableAuth?: boolean) {
+  if (enableAuth && !ctx.user) throw new Error("Authentication required for mutations");
+}
+
+function assertAdmin(ctx: GraphQLContext, enableAuth?: boolean) {
+  assertAuth(ctx, enableAuth);
+  if (enableAuth && ctx.user?.role !== "admin") throw new Error("Admin role required");
 }
 
 export function createGraphQLContext(
@@ -39,7 +50,7 @@ export function createGraphQLContext(
   };
 }
 
-export function createResolvers(onDbError?: () => boolean) {
+export function createResolvers(onDbError?: () => boolean, enableAuth?: boolean) {
   return {
     Query: {
       products: async (
@@ -104,6 +115,7 @@ export function createResolvers(onDbError?: () => boolean) {
         },
         ctx: GraphQLContext
       ) => {
+        assertAuth(ctx, enableAuth);
         const product = await dbOp(ctx, () => ctx.repo.create(args.input), onDbError);
         ctx.events.emitDomain("PRODUCT_CREATED", `Product created: ${product.name}`, { productId: product.id });
         return product;
@@ -124,6 +136,7 @@ export function createResolvers(onDbError?: () => boolean) {
         },
         ctx: GraphQLContext
       ) => {
+        assertAuth(ctx, enableAuth);
         const product = await dbOp(ctx, () => ctx.repo.update(args.id, args.input), onDbError);
         if (product) {
           ctx.events.emitDomain("PRODUCT_UPDATED", `Product updated: ${product.name}`, { productId: product.id });
@@ -132,6 +145,7 @@ export function createResolvers(onDbError?: () => boolean) {
       },
 
       deleteProduct: async (_: unknown, args: { id: string }, ctx: GraphQLContext) => {
+        assertAdmin(ctx, enableAuth);
         const deleted = await dbOp(ctx, () => ctx.repo.delete(args.id), onDbError);
         if (deleted) {
           ctx.events.emitDomain("PRODUCT_DELETED", `Product deleted: ${args.id}`, { productId: args.id });

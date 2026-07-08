@@ -62,11 +62,12 @@ export interface ProductRepository {
   count(): Promise<number>;
 }
 
-export type DataProvider = "mongodb" | "dynamodb";
+export type DataProvider = "mongodb" | "dynamodb" | "postgres";
 
 export interface DbConfig {
   provider: DataProvider;
   mongodbUri?: string;
+  postgresUri?: string;
   dynamodb?: {
     tableName: string;
     region: string;

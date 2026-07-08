@@ -1,0 +1,15 @@
+groups:
+  - name: interview-api
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: API error rate above 5%
+      - alert: ApiDown
+        expr: up{job="interview-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
