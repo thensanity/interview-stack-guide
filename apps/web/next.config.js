@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  // Standalone is for Docker/ECS — Vercel uses its own output pipeline
+  ...(process.env.VERCEL ? {} : { output: "standalone" }),
   images: {
     remotePatterns: [{ protocol: "https", hostname: "placehold.co" }],
   },

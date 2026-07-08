@@ -13,6 +13,8 @@
     "dev:next": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/web\"",
     "dev:react": "concurrently \"npm run dev -w @interview/api\" \"npm run dev -w @interview/react-spa\"",
     "build": "npm run build -w @interview/types && npm run build -w @interview/validation && npm run build -w @interview/db && npm run build -w @interview/events && npm run build -w @interview/graphql && npm run build -w @interview/api && npm run build -w @interview/web && npm run build -w @interview/react-spa",
+    "build:web": "npm run build -w @interview/web",
+    "vercel-build": "npm run build -w @interview/web",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "playwright test",
     "lint": "npm run lint --workspaces --if-present",

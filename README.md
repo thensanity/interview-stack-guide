@@ -94,6 +94,7 @@ interview-stack-guide/
 | **Decision Matrix** | [docs/DECISION-MATRIX.md](docs/DECISION-MATRIX.md) |
 | **Learning Paths** | [docs/learning-paths/](docs/learning-paths/) |
 | **Complete Tier Guide (Tiers 1–6)** | [docs/tiers/README.md](docs/tiers/README.md) |
+| **Vercel deployment** | [docs/vercel-deployment.md](docs/vercel-deployment.md) |
 | Docker demo | [docs/docker-full-demo.md](docs/docker-full-demo.md) |
 
 ## Full Docker Demo (No Node Required)
