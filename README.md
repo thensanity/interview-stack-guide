@@ -93,6 +93,7 @@ interview-stack-guide/
 | **Observability** | [docs/interview-guide/observability.md](docs/interview-guide/observability.md) |
 | **Decision Matrix** | [docs/DECISION-MATRIX.md](docs/DECISION-MATRIX.md) |
 | **Learning Paths** | [docs/learning-paths/](docs/learning-paths/) |
+| **Vercel deployment** | [docs/vercel-deployment.md](docs/vercel-deployment.md) |
 | Docker demo | [docs/docker-full-demo.md](docs/docker-full-demo.md) |
 
 ## Full Docker Demo (No Node Required)
